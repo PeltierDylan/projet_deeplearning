@@ -1,63 +1,63 @@
-# Multilingual Video Translation Pipeline
+# Pipeline de Traduction Vidéo Multilingue
 
-This document outlines the architecture for the multilingual video translation project using the Multilingual TEDx dataset.
+Ce document décrit l'architecture du projet de traduction de vidéos multilingues utilisant l'ensemble de données TEDx multilingue.
 
-## Pipeline Overview
+## Aperçu du Pipeline
 
-The pipeline consists of three main stages:
-1.  **Audio Extraction & Segmentation**
-2.  **Automatic Speech Recognition (ASR)**
-3.  **Neural Machine Translation (NMT)**
+Le pipeline comprend trois étapes principales:
+1.  **Extraction Audio et Segmentation**
+2.  **Reconnaissance Automatique de la Parole (ASR)**
+3.  **Traduction Automatique Neuronale (NMT)**
 
-### 1. Audio Extraction
-- **Input**: Video files (mp4, mkv) or long Audio files (wav).
-- **Tools**: `ffmpeg-python` for extraction and conversion.
-- **Process**:
-    - Extract audio track from video.
-    - Convert to 16kHz mono WAV format (standard for most ASR models).
-    - Segment audio based on `segments` file (start/end timestamps) if using the mTEDx format.
+### 1. Extraction Audio
+- **Entrée**: Fichiers vidéo (mp4, mkv) ou fichiers audio longs (wav).
+- **Outils**: `ffmpeg-python` pour l'extraction et la conversion.
+- **Processus**:
+    - Extraire la piste audio de la vidéo.
+    - Convertir au format WAV mono 16 kHz (standard pour la plupart des modèles ASR).
+    - Segmenter l'audio en fonction du fichier `segments` (horodatages début/fin) si on utilise le format mTEDx.
 
-### 2. Automatic Speech Recognition (ASR)
-- **Goal**: Transcribe French audio to French text.
-- **Models**:
-    - **Wav2Vec2**: `facebook/wav2vec2-large-xlsr-53-french` or similar fine-tuned models.
-    - **Whisper**: `openai/whisper-small` or `medium`.
-- **Output**: French transcripts.
+### 2. Reconnaissance Automatique de la Parole (ASR)
+- **Objectif**: Transcrire l'audio français en texte français.
+- **Modèles**:
+    - **Wav2Vec2**: `facebook/wav2vec2-large-xlsr-53-french` ou modèles similaires affinés.
+    - **Whisper**: `openai/whisper-small` ou `medium`.
+- **Sortie**: Transcripts français.
 
-### 3. Neural Machine Translation (NMT)
-- **Goal**: Translate French transcripts to Target Languages (English, Spanish, etc.).
-- **Models**:
-    - **Seq2Seq LSTM**: Baseline (optional).
+### 3. Traduction Automatique Neuronale (NMT)
+- **Objectif**: Traduire les transcripts français en langues cibles (anglais, espagnol, etc.).
+- **Modèles**:
+    - **Seq2Seq LSTM**: Baseline (optionnel).
     - **Transformer (MarianMT)**: `Helsinki-NLP/opus-mt-fr-en`, `Helsinki-NLP/opus-mt-fr-es`.
-    - **Massively Multilingual (NLLB)**: `facebook/nllb-200-distilled-600M`.
-- **Output**: Translated text.
+    - **Multilingue Massif (NLLB)**: `facebook/nllb-200-distilled-600M`.
+- **Sortie**: Texte traduit.
 
 ---
 
-## Handling Cascade Errors
+## Gestion des Erreurs en Cascade
 
-"Cascade errors" occur when mistakes made by the ASR system propagate to the NMT system, leading to poor translations. Here are strategies to mitigate them:
+Les « erreurs en cascade » se produisent lorsque les erreurs commises par le système ASR se propagent au système NMT, conduisant à de mauvaises traductions. Voici des stratégies pour les atténuer:
 
-### 1. Confidence Filtering
-- **Concept**: ASR models often provide a confidence score or probability for the transcribed text.
-- **Implementation**:
-    - Calculate the average log-probability of the ASR output tokens.
-    - If the confidence is below a certain threshold (e.g., 0.6), flag the segment for manual review or discard it to prevent "hallucinated" translations.
+### 1. Filtrage de Confiance
+- **Concept**: Les modèles ASR fournissent souvent un score de confiance ou une probabilité pour le texte transcrit.
+- **Implémentation**:
+    - Calculer la log-probabilité moyenne des tokens de sortie ASR.
+    - Si la confiance est en dessous d'un certain seuil (par ex. 0.6), marquer le segment pour révision manuelle ou le rejeter pour éviter les traductions « hallucées ».
 
-### 2. N-best Lists
-- **Concept**: Instead of taking only the single best ASR hypothesis (beam size 1), take the top-N hypotheses (e.g., N=5).
-- **Implementation**:
-    - Feed all N hypotheses into the NMT model.
-    - Use a re-ranking mechanism (e.g., using a language model or back-translation) to select the best final translation.
-    - Alternatively, concatenate hypotheses or use a "lattice-to-sequence" model if supported.
+### 2. Listes N-meilleures
+- **Concept**: Au lieu de prendre seulement la meilleure hypothèse ASR unique (beam size 1), prendre les N meilleures hypothèses (par ex. N=5).
+- **Implémentation**:
+    - Alimenter toutes les N hypothèses dans le modèle NMT.
+    - Utiliser un mécanisme de ré-classement (par ex. en utilisant un modèle de langue ou une rétro-traduction) pour sélectionner la meilleure traduction finale.
+    - Alternativement, concaténer les hypothèses ou utiliser un modèle « lattice-to-sequence » si supporté.
 
-### 3. Robust NMT Training (Data Augmentation)
-- **Concept**: Train the NMT model to be robust to ASR errors.
-- **Implementation**:
-    - **Simulated Errors**: During NMT training, inject noise into the source (French) text (e.g., random deletions, substitutions) to mimic ASR errors.
-    - **ASR Output Training**: If you have ground truth translations, transcribe the training audio using your ASR model and train the NMT model on `(ASR_Output, Ground_Truth_Translation)` pairs instead of `(Gold_Transcript, Ground_Truth_Translation)`. This adapts the NMT model to the specific error patterns of the ASR.
+### 3. Entraînement NMT Robuste (Augmentation de Données)
+- **Concept**: Entraîner le modèle NMT pour être robuste aux erreurs ASR.
+- **Implémentation**:
+    - **Erreurs Simulées**: Pendant l'entraînement NMT, injecter du bruit dans le texte source (français) (par ex. suppressions aléatoires, substitutions) pour mimer les erreurs ASR.
+    - **Entraînement de Sortie ASR**: Si vous avez des traductions de vérité de base, transcrire l'audio d'entraînement en utilisant votre modèle ASR et entraîner le modèle NMT sur des paires `(ASR_Output, Ground_Truth_Translation)` au lieu de `(Gold_Transcript, Ground_Truth_Translation)`. Cela adapte le modèle NMT aux schémas d'erreurs spécifiques de l'ASR.
 
-### 4. End-to-End Models (Alternative)
-- **Concept**: Use models that go directly from Audio to Translated Text (Speech-to-Text Translation, ST).
-- **Models**: `facebook/seamless-m4t`, `openai/whisper` (task='translate').
-- **Note**: While this avoids cascade errors, the project requirements explicitly ask for separate ASR and NMT modules for comparison. However, comparing an end-to-end model against the cascade is a valuable evaluation metric.
+### 4. Modèles Bout à Bout (Alternative)
+- **Concept**: Utiliser des modèles qui vont directement de l'Audio au Texte Traduit (Speech-to-Text Translation, ST).
+- **Modèles**: `facebook/seamless-m4t`, `openai/whisper` (task='translate').
+- **Note**: Bien que cela évite les erreurs en cascade, les exigences du projet demandent explicitement des modules ASR et NMT séparés pour la comparaison. Cependant, comparer un modèle bout à bout contre la cascade est une métrique d'évaluation précieuse.

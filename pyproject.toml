@@ -3,7 +3,8 @@ name = "projet-deeplearning"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "PeltierDylan",email = "dylan.peltier.dp@gmail.com"}
+    {name = "PeltierDylan",email = "dylan.peltier.dp@gmail.com"},
+    {name = "LardeThomas",email = "@gamil.com"}
 ]
 requires-python = ">=3.11,<3.15"
 dependencies = [
@@ -11,7 +12,22 @@ dependencies = [
     "ipykernel (>=7.2.0,<8.0.0)",
     "matplotlib (>=3.10.8,<4.0.0)",
     "seaborn (>=0.13.2,<0.14.0)",
-    "scikit-learn (>=1.8.0,<2.0.0)"
+    "scikit-learn (>=1.8.0,<2.0.0)",
+    "ffmpeg-python (>=0.2.0,<0.3.0)",
+    "librosa (>=0.11.0,<0.12.0)",
+    "soundfile (>=0.13.1,<0.14.0)",
+    "torch (>=2.10.0,<3.0.0)",
+    "torchaudio (>=2.10.0,<3.0.0)",
+    "transformers (>=5.2.0,<6.0.0)",
+    "datasets (>=4.6.0,<5.0.0)",
+    "jiwer (>=4.0.0,<5.0.0)",
+    "sacrebleu (>=2.6.0,<3.0.0)",
+    "sentencepiece (>=0.2.1,<0.3.0)",
+    "evaluate (>=0.4.6,<0.5.0)",
+    "pandas (>=3.0.1,<4.0.0)",
+    "numpy (>=2.4.2,<3.0.0)",
+    "tqdm (>=4.67.3,<5.0.0)",
+    "accelerate (>=1.12.0,<2.0.0)"
 ]
 
 
