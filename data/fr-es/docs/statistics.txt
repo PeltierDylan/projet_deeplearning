@@ -1,0 +1,32 @@
+-------------------------------------------------
+fr-es
+
+talks: 229
+
+set: train
+ talks: 196
+ sentences: 20826
+ words src: 331569
+ words tgt: 295446
+ time: 144016.92s == 40h0m17s
+
+set: valid
+ talks: 12
+ sentences: 1036
+ words src: 16590
+ words tgt: 14809
+ time: 8033.79s == 2h13m54s
+
+set: test
+ talks: 10
+ sentences: 1059
+ words src: 16136
+ words tgt: 14541
+ time: 7158.16s == 1h59m18s
+
+set: iwslt2021
+ talks: 11
+ sentences: 1041
+ words src: 16653
+ words tgt: 15224
+ time: 8342.0s == 2h19m2s
