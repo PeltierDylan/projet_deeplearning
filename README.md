@@ -23,3 +23,14 @@ Pour lancer Jupyter Notebook et tester l'exécution de bout en bout (`test.ipynb
 `poetry run jupyter notebook`
 
 *Note : Alternativement, vous pouvez activer le shell de l'environnement virtuel avec `poetry shell`.*
+
+## 4. Ajouter de nouvelles dépendances
+Si vous avez besoin d'ajouter une nouvelle bibliothèque, utilisez la commande suivante :
+`poetry add <package-name>`
+Cela mettra à jour automatiquement le fichier `pyproject.toml` et il faudra regénérer le fichier `poetry.lock` pour garantir la cohérence des versions avec :
+`poetry lock`
+## 5. Mettre à jour les dépendances
+Pour mettre à jour les dépendances à leurs dernières versions compatibles, utilisez :
+`poetry update`
+
+# 
