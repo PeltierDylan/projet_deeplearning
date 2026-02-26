@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = [
     {name = "PeltierDylan",email = "dylan.peltier.dp@gmail.com"},
-    {name = "LardeThomas",email = "@gamil.com"}
+    {name = "LardeThomas",email = "lardethomas2904@gmail.com"}
 ]
 requires-python = ">=3.11,<3.15"
 dependencies = [
