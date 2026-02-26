@@ -1,6 +1,6 @@
 import os
 import torch
-from transformers import MarianMTModel, MarianTokenizer
+from transformers import MarianMTModel, MarianTokenizer, AutoModelForSeq2SeqLM, AutoTokenizer
 
 class SubtitleTranslator:
     def __init__(self, model_name="Helsinki-NLP/opus-mt-fr-en"):
@@ -66,3 +66,36 @@ class SubtitleTranslator:
             f.writelines(translated_lines)
             
         print(f"✅ Fichier SRT traduit sauvegardé sous : {output_srt_path}")
+
+class MultilingualTranslator:
+    def __init__(self, model_name="facebook/nllb-200-distilled-600M", src_lang="fra_Latn"):
+        """
+        Initialise le modèle multilingue NLLB.
+        src_lang doit être au format BCP-47 (ex: fra_Latn pour le français)
+        """
+        self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        print(f"Chargement du modèle Multilingue '{model_name}' sur : {self.device}...")
+        
+        # Chargement du tokenizer et du modèle
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name, src_lang=src_lang)
+        self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name).to(self.device)
+
+    def translate_text(self, text, tgt_lang="eng_Latn"):
+        """
+        Traduit le texte vers la langue cible spécifiée.
+        Langues courantes : eng_Latn (Anglais), spa_Latn (Espagnol), 
+        por_Latn (Portugais), deu_Latn (Allemand), ita_Latn (Italien).
+        """
+        inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True).to(self.device)
+        
+        # On force le modèle à générer dans la langue cible
+        forced_bos_token_id = self.tokenizer.lang_code_to_id[tgt_lang]
+        
+        translated_tokens = self.model.generate(
+            **inputs,
+            forced_bos_token_id=forced_bos_token_id,
+            max_length=150
+        )
+        
+        translated_text = self.tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)
+        return translated_text[0]
