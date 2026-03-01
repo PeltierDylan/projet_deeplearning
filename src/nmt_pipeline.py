@@ -83,13 +83,11 @@ class MultilingualTranslator:
     def translate_text(self, text, tgt_lang="eng_Latn"):
         """
         Traduit le texte vers la langue cible spécifiée.
-        Langues courantes : eng_Latn (Anglais), spa_Latn (Espagnol), 
-        por_Latn (Portugais), deu_Latn (Allemand), ita_Latn (Italien).
         """
         inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True).to(self.device)
         
-        # On force le modèle à générer dans la langue cible
-        forced_bos_token_id = self.tokenizer.lang_code_to_id[tgt_lang]
+        # CORRECTIF ICI : Utilisation de convert_tokens_to_ids au lieu de lang_code_to_id
+        forced_bos_token_id = self.tokenizer.convert_tokens_to_ids(tgt_lang)
         
         translated_tokens = self.model.generate(
             **inputs,
